@@ -53,7 +53,7 @@ int main() {
     while (1) {
         char packet[2052];
         //its time for the big mamaaa
-        ssize_t recv_len = recvfrom(sock, packet, sizeof(packet) -1, 0, (struct sockaddr*)&server_addr, &addr_len);
+        ssize_t recv_len = recvfrom(sock, packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, &addr_len);
         if (recv_len < 0) {
             printf("Packet length less than 0");
             continue;
@@ -62,8 +62,7 @@ int main() {
             printf("done!\n");
             break;
         }
-        packet[recv_len] = '\0';
-        printf("recieved %zd bytes from %s:%d: %s\n", recv_len, inet_ntoa(server_addr.sin_addr), ntohs(server_addr.sin_port), packet);
+        printf("received %zd bytes from %s:%d: %s\n", recv_len, inet_ntoa(server_addr.sin_addr), ntohs(server_addr.sin_port), packet);
         char *sig = "-1";
         strcpy(outpacket, sig);
         sendto(sock, outpacket, strlen(sig), 0, (struct sockaddr*)&server_addr, addr_len);
