@@ -23,13 +23,13 @@ char readbuffer[2048] = {0};
 int main() {
     int version = 0;
     int release = 0;
-    int subrelease = 0;
+    int subrelease = 1;
     struct sigaction sa;
     sa.sa_handler = goodbye;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
     sigaction(SIGINT, &sa, NULL);
-    printf("Starting up MeshNet Client version %i%i%i...\n", version, release, subrelease);
+    printf("Starting up MeshNet Client version %i.%i.%i...\n", version, release, subrelease);
     printf("Opening socket...\n");
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
