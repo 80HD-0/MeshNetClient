@@ -20,10 +20,18 @@ int i = 0;
 uint32_t packetindex = 0;
 char outpacket[2052] = {0};
 char readbuffer[2048] = {0};
-int main() {
+char *address = "127.0.0.1";
+int main(int argc, char *argv[]) {
+    int opt;
     int version = 0;
     int release = 0;
-    int subrelease = 1;
+    int subrelease = 2;
+    while ((opt = getopt(argc, argv, "a:h")) != -1) {
+        switch (opt) {
+            case 'h': printf("MeshNetClient %i.%i.%i Help\n[-h]: Display this help menu.\n[-a (address)]: Set a server address to pull from (defualt 127.0.0.1)\n\n", version, release, subrelease); return 0;
+            case 'a': address = optarg; break;
+        }
+    }
     struct sigaction sa;
     sa.sa_handler = goodbye;
     sigemptyset(&sa.sa_mask);
@@ -43,9 +51,9 @@ int main() {
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_addr.s_addr = inet_addr(address);
     server_addr.sin_port = htons(5960);
-    printf("Pulling from UDP port 5960\n");
+    printf("Pulling from UDP %s:5960\n", address);
     socklen_t addr_len = sizeof(server_addr);
     sendto(sock, "GET", 3, 0, (struct sockaddr*)&server_addr, addr_len);
     FILE *fp = fopen("output.txt", "ab");
@@ -60,7 +68,7 @@ int main() {
         }
         if (recv_len == 4) {
             printf("done!\n");
-            break;
+            return 0;
         }
         printf("received %zd bytes from %s:%d: %s\n", recv_len, inet_ntoa(server_addr.sin_addr), ntohs(server_addr.sin_port), packet);
         char *sig = "-1";
