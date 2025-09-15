@@ -6,6 +6,9 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <sys/time.h>
+struct timeval start_time;
+size_t filesize = 0;
 
 int sock;
 void goodbye(int sig) {
@@ -25,7 +28,7 @@ int main(int argc, char *argv[]) {
     int opt;
     int version = 0;
     int release = 0;
-    int subrelease = 2;
+    int subrelease = 3;
     while ((opt = getopt(argc, argv, "a:h")) != -1) {
         switch (opt) {
             case 'h': printf("MeshNetClient %i.%i.%i Help\n[-h]: Display this help menu.\n[-a (address)]: Set a server address to pull from (defualt 127.0.0.1)\n\n", version, release, subrelease); return 0;
@@ -58,16 +61,22 @@ int main(int argc, char *argv[]) {
     sendto(sock, "GET", 3, 0, (struct sockaddr*)&server_addr, addr_len);
     FILE *fp = fopen("output.txt", "ab");
     if (!fp) { perror("fopen"); return 1; }
+    gettimeofday(&start_time, NULL);
     while (1) {
         char packet[2052];
         //its time for the big mamaaa
         ssize_t recv_len = recvfrom(sock, packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, &addr_len);
+        filesize += recv_len;
         if (recv_len < 0) {
             printf("Packet length less than 0");
             continue;
         }
         if (recv_len == 4) {
-            printf("done!\n");
+            struct timeval end_time;
+            gettimeofday(&end_time, NULL);
+            double time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_usec - start_time.tv_usec) / 1e6;
+            float speed = (filesize/time) / 1048576;
+            printf("done in %fs (%f megabytes/s)\n", time, speed);
             return 0;
         }
         printf("received %zd bytes from %s:%d: %s\n", recv_len, inet_ntoa(server_addr.sin_addr), ntohs(server_addr.sin_port), packet);

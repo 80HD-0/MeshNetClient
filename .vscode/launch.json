@@ -9,7 +9,7 @@
       "stopAtEntry": false,
       "externalConsole": false,
       "cwd": "/home/mel/MeshNetClient",
-      "program": "/home/mel/MeshNetClient/build/Debug/outDebug",
+      "program": "/home/mel/MeshNetClient/build/Debug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
