@@ -26,16 +26,18 @@ char outpacket[2052] = {0};
 char readbuffer[2048] = {0};
 char *address = "127.0.0.1";
 char *filename = "test.txt";
+int d = 0;
 int main(int argc, char *argv[]) {
     int opt;
     int version = 0;
     int release = 1;
-    int subrelease = 0;
-    while ((opt = getopt(argc, argv, "f:a:h")) != -1) {
+    int subrelease = 1;
+    while ((opt = getopt(argc, argv, "f:a:hd")) != -1) {
         switch (opt) {
-            case 'h': printf("MeshNetClient %i.%i.%i Help\n[-h]: Display this help menu.\n[-a (address)]: Set a server address to pull from (default 127.0.0.1)\n[-f (filename)]: Gets that file from the server (default test.txt)\n\n", version, release, subrelease); return 0;
+            case 'h': printf("MeshNetClient %i.%i.%i Help\n[-h]: Display this help menu.\n[-d]: Delay packets by a half second (for debugging)\n[-a (address)]: Set a server address to pull from (default 127.0.0.1)\n[-f (filename)]: Gets that file from the server (default test.txt)\n\n", version, release, subrelease); return 0;
             case 'a': address = optarg; break;
             case 'f': filename = optarg; break;
+            case 'd': d = 1; break;
         }
     }
     struct sigaction sa;
@@ -77,7 +79,6 @@ int main(int argc, char *argv[]) {
         //its time for the big mamaaa
         ssize_t recv_len = recvfrom(sock, packet, sizeof(packet), 0, (struct sockaddr*)&server_addr, &addr_len);
         if (recv_len < 0) {
-            printf("Packet length less than 0");
             continue;
         }
         if (recv_len == 4) {
@@ -98,6 +99,9 @@ int main(int argc, char *argv[]) {
         }
         fwrite(packet + 4, 1, recv_len - 4, fp);
         filesize += recv_len;
+        if (d==1) {
+            sleep(1);
+        }
     }
     return(0);
 }
